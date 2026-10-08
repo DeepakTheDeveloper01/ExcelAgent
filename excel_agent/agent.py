@@ -442,10 +442,11 @@ def _call_llm(prompt: str, max_tokens: int = 1200) -> str:
             errors.append(f"Anthropic: {exc}")
     if OPENAI_KEY:
         try:
+            from groq import Groq  # type: ignore
             from openai import OpenAI
-            client = OpenAI(api_key=OPENAI_KEY)
+            client = Groq(api_key=OPENAI_KEY)
             resp = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="openai/gpt-oss-120b",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 temperature=0.2,
@@ -460,7 +461,7 @@ def _call_llm(prompt: str, max_tokens: int = 1200) -> str:
         try:
             from openai import OpenAI
             client = OpenAI(api_key=GROQ_KEY, base_url="https://api.groq.com/openai/v1")
-            resp = client.chat.completions.create(model="llama-3.3-70b-versatile",messages=[
+            resp = client.chat.completions.create(model="openai/gpt-oss-120b",messages=[
             {"role": "user", "content": prompt}], max_tokens=max_tokens, temperature=0.2
             )
             response = (resp.choices[0].message.content or "").strip()
