@@ -16,10 +16,9 @@ try:
 except Exception:
     pass
 
-OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY")
 GROQ_KEY = os.environ.get("GROQ_API_KEY")
-USE_REAL_LLM = bool(OPENAI_KEY or ANTHROPIC_KEY or GROQ_KEY)
+USE_REAL_LLM = bool(ANTHROPIC_KEY or GROQ_KEY)
 
 
 @dataclass
@@ -440,23 +439,6 @@ def _call_llm(prompt: str, max_tokens: int = 1200) -> str:
             errors.append("Anthropic returned an empty response")
         except Exception as exc:
             errors.append(f"Anthropic: {exc}")
-    if OPENAI_KEY:
-        try:
-            from groq import Groq  # type: ignore
-            from openai import OpenAI
-            client = Groq(api_key=OPENAI_KEY)
-            resp = client.chat.completions.create(
-                model="openai/gpt-oss-120b",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens,
-                temperature=0.2,
-            )
-            response = (resp.choices[0].message.content or "").strip()
-            if response:
-                return response
-            errors.append("OpenAI returned an empty response")
-        except Exception as exc:
-            errors.append(f"OpenAI: {exc}")
     if GROQ_KEY:
         try:
             from openai import OpenAI
@@ -639,7 +621,7 @@ Summarise the findings in 3-6 sentences of plain, clear English. Mention key num
                     self._llm_summary_warning_shown = True
         else:
             summary = self._summarize_demo(user_query, kind, exec_result, search_results)
-            note_parts.append("Demo mode (no LLM configured). Set OPENAI_API_KEY or ANTHROPIC_API_KEY for smarter answers.")
+            note_parts.append("Demo mode (no LLM configured). Set GROQ_API_KEY or ANTHROPIC_API_KEY for smarter answers.")
 
         if search_results:
             note_parts.append(f"Definitions looked up: {[r.query for r in search_results]}")
